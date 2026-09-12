@@ -13,13 +13,13 @@ The four essays and two authors shipped here are sample content to show the layo
 
 ## First-time setup
 
-### 1. Put the code on `main`
+### 1. Keep the code on `main`
 
-The deploy workflow and the editor both target the `main` branch (see `src/site.config.ts` and `.github/workflows/deploy.yml`). If this code is on another branch, merge it into `main` or rename the branch.
+The deploy workflow and the editor both target the `main` branch (see `src/site.config.ts` and `.github/workflows/deploy.yml`). Make `main` the repository's default branch if it is not already: **Settings → General → Default branch**.
 
-### 2. Turn on GitHub Pages
+### 2. GitHub Pages
 
-In the repository on GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**. That is all. Every push to `main` builds and deploys the site to `https://aandelu.github.io/blog/`. The first deploy takes a couple of minutes.
+The site is served from the `gh-pages` branch. Every push to `main` runs `.github/workflows/deploy.yml`, which builds the site and rewrites `gh-pages` with the output, and GitHub publishes it to `https://aandelu.github.io/blog/` a minute or so later. Pages was switched on by the first deploy. If **Settings → Pages** ever shows it off, set **Build and deployment → Source** to *Deploy from a branch*, branch `gh-pages`, folder `/ (root)`.
 
 ### 3. Give each author a token
 

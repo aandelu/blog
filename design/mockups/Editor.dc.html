@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&amp;family=Instrument+Sans:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F6F3EC; color: #1C1B18; font-family: 'Newsreader', Georgia, 'Times New Roman', serif; -webkit-font-smoothing: antialiased; }
+    a { color: #1C1B18; text-decoration: none; }
+    a:hover { color: #A65A3C; }
+    .sans { font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    .meta { font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 13px; letter-spacing: 0.01em; color: #5F5A51; display: flex; align-items: center; gap: 10px; }
+    .body { font-family: 'Newsreader', Georgia, serif; font-size: 20px; line-height: 1.55; margin: 0; text-wrap: pretty; }
+    .sidenote { font-family: 'Newsreader', Georgia, serif; font-size: 14.5px; line-height: 1.45; color: #5F5A51; margin: 0; padding-top: 6px; }
+    .tool { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #F6F3EC; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .field { color: #1C1B18; border-bottom: 1px dashed #B9B3A6; padding-bottom: 1px; }
+  </style>
+</helmet>
+<div style="width: 1200px; min-height: 1480px; background: #F6F3EC; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+
+  <div style="width: 1200px; height: 52px; box-sizing: border-box; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E2DCD0; background: #F6F3EC;">
+    <a href="#" class="sans" style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #5F5A51;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"></path></svg>Essays</a>
+    <div class="sans" style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #5F5A51;"><span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #8A9A6B;"></span>Draft, saved just now</div>
+    <a href="#" class="sans" style="font-size: 14px; font-weight: 500; color: #F6F3EC; background: #1C1B18; padding: 8px 16px; border-radius: 4px;">Publish</a>
+  </div>
+
+  <div style="width: 940px; display: flex; flex-direction: column; padding: 40px 0 72px 0;">
+
+    <header style="width: 680px; display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 18px; border-bottom: 1px solid #1C1B18;">
+      <a href="#" style="font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: 24px; letter-spacing: -0.01em; color: #1C1B18;">Counterpoint</a>
+      <nav class="sans" style="display: flex; gap: 28px; font-size: 14px;">
+        <a href="#" style="color: #5F5A51;">Essays</a>
+        <a href="#" style="color: #5F5A51;">Authors</a>
+        <a href="#" style="color: #5F5A51;">About</a>
+        <a href="#" style="color: #5F5A51;">RSS</a>
+      </nav>
+    </header>
+
+    <div style="width: 680px; display: flex; flex-direction: column; gap: 16px; margin-top: 64px;">
+      <div class="meta">
+        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3E6A8A;"></span>
+        <a href="#" style="color: #3E6A8A; font-weight: 500;">Folio</a>
+        <span style="color: #B9B3A6;">·</span>
+        <span>4 September 2026</span>
+      </div>
+      <h1 style="font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: 46px; line-height: 1.12; letter-spacing: -0.015em; margin: 0; text-wrap: balance;">Stevens cannot say what he means</h1>
+      <p style="font-style: italic; font-size: 19px; line-height: 1.5; color: #5F5A51; margin: 2px 0 0 0;">On <span style="font-style: normal;">The Remains of the Day</span>, by Kazuo Ishiguro</p>
+      <div class="sans" style="display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 13.5px; color: #5F5A51; margin-top: 4px;">
+        <span>Book <span class="field">The Remains of the Day, Kazuo Ishiguro</span></span>
+        <span>Reply to <span class="field">none</span></span>
+        <span>Publish as <span class="field" style="color: #3E6A8A; font-weight: 500;">Folio</span></span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 680px 220px; column-gap: 40px; row-gap: 22px; margin-top: 40px;">
+      <p class="body" style="grid-column: 1;">There is a sentence near the beginning of <em>The Remains of the Day</em> that I have read perhaps thirty times, and I am still not sure I could tell you what it says. Stevens is explaining why he has decided to take a motoring trip to the West Country. He gives a reason, then qualifies it, then apologises for the qualification, and by the end of the paragraph the reason has been replaced by a different one that he seems not to have noticed arriving.</p>
+      <p class="body" style="grid-column: 1; position: relative;"><span style="position: absolute; top: -48px; left: 0; display: flex; align-items: center; gap: 2px; background: #1C1B18; border-radius: 6px; padding: 4px; box-shadow: 0 8px 24px rgba(28, 27, 24, 0.18);"><span class="tool">B</span><span class="tool" style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-weight: 500; font-size: 17px;">I</span><span class="tool">H</span><span class="tool"><svg width="16" height="16" viewBox="0 0 16 16" fill="#F6F3EC"><path d="M3 9.5C3 6.6 4.4 4.6 6.9 3.5l.5 1C6 5.2 5.3 6.2 5.1 7.5H7v4H3V9.5zm6 0c0-2.9 1.4-4.9 3.9-6l.5 1c-1.4.7-2.1 1.7-2.3 3H13v4H9V9.5z"></path></svg></span><span class="tool"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#F6F3EC" stroke-width="1.5" stroke-linecap="round"><path d="M6.5 9.5l3-3"></path><path d="M7 4.5l1-1a2.5 2.5 0 0 1 3.5 3.5l-1 1"></path><path d="M9 11.5l-1 1a2.5 2.5 0 0 1-3.5-3.5l1-1"></path></svg></span><span class="tool" style="width: auto; padding: 0 9px; font-size: 12.5px;">Note</span></span><mark style="background: #D6E1EA; color: inherit; padding: 1px 0;">This is the whole novel in miniature.</mark> Ishiguro has built a book out of sentences that circle their subject without landing on it, and the effect is not vagueness but its opposite. We learn exactly what Stevens feels precisely because he is so careful never to say it. The prose is a butler: it anticipates, it withdraws, it leaves the room before anything unpleasant can be said in its presence.</p>
+      <p class="body" style="grid-column: 1;">Consider the passage about Miss Kenton's letter.<sup style="font-size: 0.6em; line-height: 0; color: #5F5A51; margin-left: 2px;">1</sup> Stevens reads into it "an unmistakable nostalgia for Darlington Hall", and then, some pages later, allows that the letter contains nothing of the kind. He does not retract the earlier reading. He simply lets the two sit beside each other, and trusts that we will be too polite to point out the contradiction.</p>
+      <p class="sidenote" style="grid-column: 2; align-self: start;"><span style="color: #5F5A51; margin-right: 6px;">1</span>The letter is quoted in fragments across the first three sections. Ishiguro never lets us read it whole, which is its own kind of tact.</p>
+      <p class="body" style="grid-column: 1;">What interests me is that this is not, technically, an unreliable narrator in the usual sense. Stevens does not lie. He reports events accurately and interprets them wrongly, and the interpretation is always in the direction of dignity. The word appears dozens of times. It is the load-bearing wall of his whole account, and it is doing the work that the word love would do in a different book.</p>
+      <p class="body" style="grid-column: 1;">The novel ends on a pier at Weymouth, with Stevens resolving to practise bantering. It is played almost as comedy. But bantering is just another word for saying something you do not quite mean in the hope that it comes out as warmth, and he has been doing that for the entire book. The joke is that he thinks he is only now starting.</p>
+      <p class="body" style="grid-column: 1; color: #B9B3A6; font-style: italic;">Keep going</p>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
