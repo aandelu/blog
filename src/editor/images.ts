@@ -136,3 +136,54 @@ export function stripBase(html: string, base: string): string {
   return html.replace(/(<img\b[^>]*\bsrc=")([^"]*)"/gi, (_m, pre: string, src: string) =>
     `${pre}${src.startsWith(`${prefix}/`) ? src.slice(prefix.length) : src}"`);
 }
+
+// Pasted rich text (from a web page, a document, a note) can carry pictures
+// as <img> tags. Each becomes a figure the editor understands. Pictures the
+// browser can never read, such as file:// paths from Word, are dropped and
+// counted so the writer can be told.
+export function pastedHtmlWithFigures(html: string): { html: string; srcs: string[]; unreadable: number } {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const srcs: string[] = [];
+  let unreadable = 0;
+  for (const img of Array.from(doc.querySelectorAll('img'))) {
+    const src = (img.getAttribute('src') ?? '').trim();
+    const host: Element = img.closest('figure') ?? img;
+    if (!/^(data:image\/|https?:\/\/|\/\/)/i.test(src)) {
+      unreadable += 1;
+      host.remove();
+      continue;
+    }
+    const figure = doc.createElement('figure');
+    const copy = doc.createElement('img');
+    copy.setAttribute('src', src);
+    copy.setAttribute('alt', img.getAttribute('alt') ?? '');
+    const caption = doc.createElement('figcaption');
+    caption.textContent = host === img ? '' : (host.querySelector('figcaption')?.textContent?.trim() ?? '');
+    figure.append(copy, caption);
+    host.replaceWith(figure);
+    if (!srcs.includes(src)) srcs.push(src);
+  }
+  return { html: doc.body.innerHTML, srcs, unreadable };
+}
+
+export function htmlHasText(html: string): boolean {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return (doc.body.textContent ?? '').trim().length > 0;
+}
+
+// Fetches a pasted picture's bytes so it can be shrunk and stored like any
+// other. Works for data URLs, and for websites that allow it.
+export async function fetchImageFile(src: string): Promise<File> {
+  const res = await fetch(src, { mode: 'cors' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const blob = await res.blob();
+  if (!blob.type.startsWith('image/')) throw new Error('Not an image');
+  let name = 'pasted-picture';
+  if (/^(https?:)?\/\//i.test(src)) {
+    try {
+      const last = new URL(src, location.href).pathname.split('/').filter(Boolean).pop();
+      if (last) name = decodeURIComponent(last);
+    } catch { /* keep the default name */ }
+  }
+  return new File([blob], name, { type: blob.type });
+}

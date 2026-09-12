@@ -6,7 +6,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Typography from '@tiptap/extension-typography';
 import { Sidenote } from './sidenote';
 import { Figure } from './figure';
-import { extractDataImages, imageFiles, prepareImage, stripBase, withBase } from './images';
+import { extractDataImages, fetchImageFile, htmlHasText, imageFiles, pastedHtmlWithFigures, prepareImage, stripBase, withBase } from './images';
 import { looksLikeHtml, parseFrontmatter, plainTextToHtml, serializeEssay, type EssayMeta } from './frontmatter';
 import { GitHubError, fileSha, getFile, putFile, whoAmI } from './github';
 
@@ -28,9 +28,9 @@ interface Draft {
   updatedAt: number;
 }
 
-export const KEY_TOKEN = 'counterpoint.token';
-const KEY_AUTHOR = 'counterpoint.author';
-const DRAFT_PREFIX = 'counterpoint.draft.';
+export const KEY_TOKEN = 'demagogues.token';
+const KEY_AUTHOR = 'demagogues.author';
+const DRAFT_PREFIX = 'demagogues.draft.';
 
 function el<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -194,6 +194,10 @@ export function mountEditor(): void {
     toastTimer = window.setTimeout(() => { ui.toast.hidden = true; }, ms);
   }
 
+  // Pictures arriving inside pasted rich text, waiting to be fetched and shrunk.
+  const pendingPasted = new Set<string>();
+  let unreadablePasted = 0;
+
   // ----- the body editor -----
   const editor = new Editor({
     element: ui.editorHost,
@@ -211,9 +215,23 @@ export function mountEditor(): void {
     content: '',
     editorProps: {
       attributes: { spellcheck: 'true' },
+      // Runs before the paste is parsed: pictures in the HTML become figures.
+      transformPastedHTML: (html) => {
+        const result = pastedHtmlWithFigures(html);
+        for (const src of result.srcs) pendingPasted.add(src);
+        unreadablePasted = result.unreadable;
+        return result.html;
+      },
       handlePaste: (_view, event) => {
+        // An image file on the clipboard with no text beside it (a screenshot,
+        // a single copied picture) is inserted directly. Text with pictures in
+        // it goes through the normal paste, figures included.
         const files = imageFiles(event.clipboardData);
         if (files.length === 0) return false;
+        const html = event.clipboardData?.getData('text/html') ?? '';
+        if (html && htmlHasText(html)) return false;
+        pendingPasted.clear();
+        unreadablePasted = 0;
         void insertPictures(files);
         return true;
       },
@@ -227,6 +245,15 @@ export function mountEditor(): void {
       },
     },
     onUpdate: () => { markDirty(); updateEmptyClass(); },
+    onTransaction: ({ transaction }) => {
+      if (!transaction.getMeta('paste')) return;
+      if (unreadablePasted) {
+        const n = unreadablePasted;
+        unreadablePasted = 0;
+        toast(n === 1 ? 'One picture in the pasted text could not be read from the clipboard. Add it with "Add a picture".' : `${n} pictures in the pasted text could not be read from the clipboard. Add them with "Add a picture".`, 9000);
+      }
+      if (pendingPasted.size) void preparePastedPictures();
+    },
     onSelectionUpdate: () => positionToolbar(),
     onFocus: () => positionToolbar(),
     onBlur: () => { window.setTimeout(() => { if (!editor.isFocused) ui.fmt.hidden = true; }, 150); },
@@ -247,6 +274,37 @@ export function mountEditor(): void {
         toast((error as Error).message || 'Could not add that picture.', 7000);
       }
     }
+    markDirty();
+  }
+  // Pictures that came in with pasted text still point at their source. Fetch
+  // each, shrink it, and swap it in. A website that refuses stays linked.
+  async function preparePastedPictures(): Promise<void> {
+    const srcs = Array.from(pendingPasted);
+    pendingPasted.clear();
+    const positionsOf = (src: string) => {
+      const found: number[] = [];
+      editor.state.doc.descendants((n, pos) => {
+        if (n.type.name === 'figure' && n.attrs.src === src) found.push(pos);
+        return n.type.name !== 'figure';
+      });
+      return found;
+    };
+    let linked = 0;
+    for (const src of srcs) {
+      if (positionsOf(src).length === 0) continue;
+      status('Preparing picture', 'busy');
+      let prepared: { dataUrl: string; name: string } | null = null;
+      try { prepared = await prepareImage(await fetchImageFile(src)); } catch { prepared = null; }
+      const positions = positionsOf(src);
+      if (!prepared) {
+        if (positions.length && /^(https?:)?\/\//i.test(src)) linked += 1;
+        continue;
+      }
+      const tr = editor.state.tr;
+      for (const pos of positions) tr.setNodeMarkup(pos, undefined, { ...editor.state.doc.nodeAt(pos)!.attrs, src: prepared.dataUrl, name: prepared.name });
+      editor.view.dispatch(tr);
+    }
+    if (linked) toast(linked === 1 ? 'One pasted picture links to another website rather than being copied here. If it ever goes missing, add it with "Add a picture".' : `${linked} pasted pictures link to other websites rather than being copied here. If they ever go missing, add them with "Add a picture".`, 9000);
     markDirty();
   }
   ui.picture.addEventListener('click', () => { ui.pictureFile.value = ''; ui.pictureFile.click(); });

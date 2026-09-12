@@ -1,6 +1,6 @@
 // Site-wide settings. Everything an author might want to change lives here.
 export const siteConfig = {
-  name: 'Counterpoint',
+  name: 'Blog Demagogues',
   tagline: 'Essays about books, by Folio and Marginalia. Occasionally at each other.',
   description: 'Essays about books, and occasionally at each other.',
 

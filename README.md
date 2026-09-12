@@ -1,4 +1,4 @@
-# Counterpoint
+# Blog Demagogues
 
 A blog for two (or more) people who write essays about books, sometimes in reply to each other.
 
@@ -48,7 +48,7 @@ Go to `/write/`. Type a title, a one-line summary, the book (if there is one), a
 
 Pick who you are publishing as, set **Reply to** if the essay answers another, and press **Publish**. The site rebuilds within a couple of minutes. To change a published essay, open it on the site and click **Edit** (the link appears once a token is saved in that browser), or go to `/write/?slug=the-essay-slug`.
 
-**Pictures.** Click **Add a picture** under the essay, or paste or drop an image into the text. It appears where the cursor was, with a caption you can type or leave empty. The browser shrinks it to at most 1600 pixels on its longest side before it goes anywhere. When you publish, the pictures are committed to `public/images/essays/<slug>/` and the essay refers to them there. To remove one, click it and press Delete.
+**Pictures.** Click **Add a picture** under the essay, or paste or drop an image into the text. It appears where the cursor was, with a caption you can type or leave empty. Pasting text that has pictures in it, from a web page, a note or a document, keeps the pictures where they were. A few programs put only a reference to the picture on the clipboard (Word on Windows does this for pictures inside a selection); the editor says so, and you add those with **Add a picture**. The browser shrinks it to at most 1600 pixels on its longest side before it goes anywhere. When you publish, the pictures are committed to `public/images/essays/<slug>/` and the essay refers to them there. To remove one, click it and press Delete.
 
 Drafts live in the browser you wrote them in until published. The write page lists them.
 
