@@ -1,0 +1,63 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Masthead from '../../components/Masthead.astro';
+import Byline from '../../components/Byline.astro';
+import ReplyLine from '../../components/ReplyLine.astro';
+import EssayEntry from '../../components/EssayEntry.astro';
+import Comments from '../../components/Comments.astro';
+import { authorOf, publishedEssays, responseCounts, type Essay } from '../../lib/essays';
+import { countLabel, inlineMarkup } from '../../lib/text';
+import { url } from '../../lib/urls';
+
+export async function getStaticPaths() {
+  const essays = await publishedEssays();
+  return essays.map((essay) => ({ params: { slug: essay.id }, props: { essay } }));
+}
+
+interface Props {
+  essay: Essay;
+}
+
+const { essay } = Astro.props;
+const { Content } = await render(essay);
+const author = await authorOf(essay);
+const essays = await publishedEssays();
+const counts = responseCounts(essays);
+const parent = essay.data.replyTo ? essays.find((e) => e.id === essay.data.replyTo) : undefined;
+const parentAuthor = parent ? await authorOf(parent) : undefined;
+const responses = essays.filter((e) => e.data.replyTo === essay.id);
+const responseAuthors = await Promise.all(responses.map(authorOf));
+const { title, dek, date, bookTitle, bookAuthor } = essay.data;
+---
+<Base title={title} description={dek}>
+  <div class="page">
+    <div class="col"><Masthead /></div>
+    <article class="essay">
+      <header class="col essay-header">
+        <Byline author={author} date={date}>
+          <a id="edit-link" class="edit-link" href={url(`/write/?slug=${essay.id}`)} hidden>Edit</a>
+        </Byline>
+        <h1 class="essay-title" set:html={inlineMarkup(title)} />
+        {bookTitle && (
+          <p class="essay-book">On <span class="book-title">{bookTitle}</span>{bookAuthor && <>, by {bookAuthor}</>}</p>
+        )}
+        {parent && parentAuthor && <ReplyLine parent={parent} parentAuthor={parentAuthor} />}
+      </header>
+      <div class="col essay-body"><Content /></div>
+    </article>
+    {responses.length > 0 && (
+      <section class="col section" id="responses">
+        <div class="label">{countLabel(responses.length, 'response')}</div>
+        {responses.map((r, i) => (
+          <EssayEntry essay={r} author={responseAuthors[i]!} responses={counts.get(r.id) ?? 0} compact />
+        ))}
+      </section>
+    )}
+    <div class="col"><Comments /></div>
+  </div>
+  <script is:inline>
+    // Authors who have set up the editor on this device get an Edit link.
+    try { if (localStorage.getItem('counterpoint.token')) document.getElementById('edit-link').hidden = false; } catch (e) {}
+  </script>
+</Base>

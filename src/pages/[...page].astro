@@ -1,0 +1,48 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../layouts/Base.astro';
+import Masthead from '../components/Masthead.astro';
+import EssayEntry from '../components/EssayEntry.astro';
+import Pager from '../components/Pager.astro';
+import { siteConfig } from '../site.config';
+import { allAuthors, publishedEssays, responseCounts } from '../lib/essays';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const essays = await publishedEssays();
+  return paginate(essays, { pageSize: siteConfig.perPage });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const essays = await publishedEssays();
+const authors = await allAuthors();
+const byId = new Map(essays.map((e) => [e.id, e]));
+const authorById = new Map(authors.map((a) => [a.id, a]));
+const counts = responseCounts(essays);
+
+function authorFor(id: string) {
+  const a = authorById.get(id);
+  if (!a) throw new Error(`Unknown author "${id}". Add src/content/authors/${id}.json.`);
+  return a;
+}
+---
+<Base>
+  <div class="page">
+    <div class="col">
+      <Masthead />
+      {page.currentPage === 1 && <p class="tagline">{siteConfig.tagline}</p>}
+      {page.data.map((essay) => {
+        const parent = essay.data.replyTo ? byId.get(essay.data.replyTo) : undefined;
+        return (
+          <EssayEntry
+            essay={essay}
+            author={authorFor(essay.data.author.id)}
+            parent={parent}
+            parentAuthor={parent ? authorFor(parent.data.author.id) : undefined}
+            responses={counts.get(essay.id) ?? 0}
+          />
+        );
+      })}
+      <Pager prev={page.url.prev} next={page.url.next} />
+    </div>
+  </div>
+</Base>

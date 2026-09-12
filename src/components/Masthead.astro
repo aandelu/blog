@@ -1,0 +1,19 @@
+---
+import { siteConfig } from '../site.config';
+import { url } from '../lib/urls';
+
+const nav: Array<[string, string]> = [
+  ['Essays', url('/')],
+  ['Authors', url('/authors/')],
+  ['About', url('/about/')],
+  ['RSS', url('/rss.xml')],
+];
+const here = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === here;
+---
+<header class="masthead">
+  <a class="wordmark" href={url('/')}>{siteConfig.name}</a>
+  <nav>
+    {nav.map(([label, href]) => <a href={href} aria-current={isCurrent(href) ? 'page' : undefined}>{label}</a>)}
+  </nav>
+</header>

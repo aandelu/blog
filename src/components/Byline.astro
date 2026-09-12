@@ -1,0 +1,27 @@
+---
+import type { Author } from '../lib/essays';
+import { authorUrl, essayUrl, formatDate } from '../lib/urls';
+
+interface Props {
+  author: Author;
+  date: Date;
+  // When set, a "responses" link points at this essay's responses section.
+  essayId?: string;
+  responses?: number;
+}
+
+const { author, date, essayId, responses = 0 } = Astro.props;
+---
+<div class="meta" style={`--author: ${author.data.color}`}>
+  <span class="dot"></span>
+  <a class="author" href={authorUrl(author.id)}>{author.data.name}</a>
+  <span class="sep">·</span>
+  <time datetime={date.toISOString().slice(0, 10)}>{formatDate(date)}</time>
+  {responses > 0 && essayId && (
+    <>
+      <span class="sep">·</span>
+      <a href={`${essayUrl(essayId)}#responses`}>{responses} {responses === 1 ? 'response' : 'responses'}</a>
+    </>
+  )}
+  <slot />
+</div>

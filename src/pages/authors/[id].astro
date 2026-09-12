@@ -1,0 +1,48 @@
+---
+import Base from '../../layouts/Base.astro';
+import Masthead from '../../components/Masthead.astro';
+import EssayEntry from '../../components/EssayEntry.astro';
+import { allAuthors, publishedEssays, responseCounts, type Author } from '../../lib/essays';
+
+export async function getStaticPaths() {
+  const authors = await allAuthors();
+  return authors.map((author) => ({ params: { id: author.id }, props: { author } }));
+}
+
+interface Props {
+  author: Author;
+}
+
+const { author } = Astro.props;
+const essays = await publishedEssays();
+const authors = await allAuthors();
+const authorById = new Map(authors.map((a) => [a.id, a]));
+const byId = new Map(essays.map((e) => [e.id, e]));
+const counts = responseCounts(essays);
+const mine = essays.filter((e) => e.data.author.id === author.id);
+---
+<Base title={author.data.name} description={author.data.bio}>
+  <div class="page">
+    <div class="col">
+      <Masthead />
+      <header class="essay-header" style="margin-top: 48px; margin-bottom: 24px;">
+        <div class="meta" style={`--author: ${author.data.color}`}><span class="dot"></span><span class="label" style="letter-spacing: 0.04em; text-transform: none; font-size: 13px;">Author</span></div>
+        <h1 class="essay-title">{author.data.name}</h1>
+        {author.data.bio && <p class="essay-book" style="font-style: normal;">{author.data.bio}</p>}
+      </header>
+      {mine.map((essay) => {
+        const parent = essay.data.replyTo ? byId.get(essay.data.replyTo) : undefined;
+        return (
+          <EssayEntry
+            essay={essay}
+            author={author}
+            parent={parent}
+            parentAuthor={parent ? authorById.get(parent.data.author.id) : undefined}
+            responses={counts.get(essay.id) ?? 0}
+          />
+        );
+      })}
+      {mine.length === 0 && <p class="tagline">Nothing published yet.</p>}
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import Masthead from '../../components/Masthead.astro';
+import { allAuthors, publishedEssays } from '../../lib/essays';
+import { authorUrl } from '../../lib/urls';
+import { countLabel } from '../../lib/text';
+
+const authors = await allAuthors();
+const essays = await publishedEssays();
+---
+<Base title="Authors">
+  <div class="page">
+    <div class="col">
+      <Masthead />
+      <div style="margin-top: 32px;">
+        {authors.map((a) => (
+          <div class="author-card">
+            <div class="meta" style={`--author: ${a.data.color}`}><span class="dot"></span><span class="count">{countLabel(essays.filter((e) => e.data.author.id === a.id).length, 'essay')}</span></div>
+            <h2><a href={authorUrl(a.id)}>{a.data.name}</a></h2>
+            {a.data.bio && <p>{a.data.bio}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,24 @@
+---
+import type { Author, Essay } from '../lib/essays';
+import { essayUrl } from '../lib/urls';
+import { inlineMarkup } from '../lib/text';
+import Byline from './Byline.astro';
+import ReplyLine from './ReplyLine.astro';
+
+interface Props {
+  essay: Essay;
+  author: Author;
+  parent?: Essay;
+  parentAuthor?: Author;
+  responses?: number;
+  compact?: boolean;
+}
+
+const { essay, author, parent, parentAuthor, responses = 0, compact = false } = Astro.props;
+---
+<article class:list={['entry', { compact }]}>
+  <Byline author={author} date={essay.data.date} essayId={essay.id} responses={responses} />
+  <h2 class="entry-title"><a href={essayUrl(essay.id)} set:html={inlineMarkup(essay.data.title)} /></h2>
+  {essay.data.dek && <p class="dek" set:html={inlineMarkup(essay.data.dek)} />}
+  {parent && parentAuthor && <ReplyLine parent={parent} parentAuthor={parentAuthor} />}
+</article>
