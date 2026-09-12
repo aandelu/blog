@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 220" width="680" height="220" role="img" aria-label="Twelve book spines in a row, eleven of them the same colour and one a different one">
+  <rect width="680" height="220" fill="#EFEAE0"/>
+  <g stroke="#1C1B18" stroke-width="1.5">
+    <rect x="40" y="60" width="38" height="130" fill="#A65A3C"/>
+    <rect x="86" y="50" width="34" height="140" fill="#A65A3C"/>
+    <rect x="128" y="64" width="42" height="126" fill="#A65A3C"/>
+    <rect x="178" y="56" width="36" height="134" fill="#A65A3C"/>
+    <rect x="222" y="48" width="40" height="142" fill="#A65A3C"/>
+    <rect x="270" y="62" width="34" height="128" fill="#A65A3C"/>
+    <rect x="312" y="54" width="38" height="136" fill="#A65A3C"/>
+    <rect x="358" y="58" width="44" height="132" fill="#A65A3C"/>
+    <rect x="410" y="50" width="36" height="140" fill="#A65A3C"/>
+    <rect x="454" y="66" width="40" height="124" fill="#A65A3C"/>
+    <rect x="502" y="52" width="34" height="138" fill="#A65A3C"/>
+    <rect x="544" y="44" width="46" height="146" fill="#3E6A8A"/>
+    <line x1="24" y1="190" x2="656" y2="190"/>
+  </g>
+</svg>

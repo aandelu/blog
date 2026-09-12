@@ -48,7 +48,8 @@ const config = {
         </div>
       </header>
       <div class="col essay-body is-empty" id="editor"></div>
-      <p class="col editor-hint">Select text to format it. <kbd>Ctrl</kbd> or <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd> adds a margin note where the cursor is. Drafts save to this browser as you type.</p>
+      <p class="col editor-hint">Select text to format it. <kbd>Ctrl</kbd> or <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd> adds a margin note where the cursor is. <button type="button" class="linkish" id="btn-picture">Add a picture</button> there instead, or paste or drop one in. To remove a picture, click it and press Delete. Drafts save to this browser as you type.</p>
+      <input type="file" id="picture-file" accept="image/*" multiple hidden />
     </article>
   </div>
 
@@ -63,7 +64,7 @@ const config = {
 
   <dialog class="settings" id="settings">
     <h2>Publishing</h2>
-    <p>Publishing commits the essay to <strong>{siteConfig.repo}</strong> on the <strong>{siteConfig.branch}</strong> branch. GitHub then rebuilds the site. To do that from this browser, the editor needs a token from your GitHub account. It stays in this browser only.</p>
+    <p>Publishing commits the essay, and any pictures in it, to <strong>{siteConfig.repo}</strong> on the <strong>{siteConfig.branch}</strong> branch. GitHub then rebuilds the site. To do that from this browser, the editor needs a token from your GitHub account. It stays in this browser only.</p>
     <ol>
       <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li>
       <li>Under Repository access choose <em>Only select repositories</em> and pick <strong>{siteConfig.repo}</strong>.</li>

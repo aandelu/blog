@@ -5,8 +5,10 @@ import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Typography from '@tiptap/extension-typography';
 import { Sidenote } from './sidenote';
+import { Figure } from './figure';
+import { extractDataImages, imageFiles, prepareImage, stripBase, withBase } from './images';
 import { looksLikeHtml, parseFrontmatter, plainTextToHtml, serializeEssay, type EssayMeta } from './frontmatter';
-import { GitHubError, getFile, putFile, whoAmI } from './github';
+import { GitHubError, fileSha, getFile, putFile, whoAmI } from './github';
 
 interface AuthorInfo { id: string; name: string; color: string }
 interface WriteConfig { repo: string; branch: string; essaysDir: string; base: string; authors: AuthorInfo[] }
@@ -72,8 +74,15 @@ function loadDraft(id: string): Draft | null {
   try { return JSON.parse(raw) as Draft; } catch { return null; }
 }
 
-function saveDraft(draft: Draft): void {
-  storage()?.setItem(DRAFT_PREFIX + draft.id, JSON.stringify(draft));
+// False when the browser refuses, which happens when pictures push a draft
+// past the storage limit.
+function saveDraft(draft: Draft): boolean {
+  try {
+    storage()?.setItem(DRAFT_PREFIX + draft.id, JSON.stringify(draft));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function deleteDraft(id: string): void {
@@ -139,6 +148,8 @@ export function mountEditor(): void {
     tokenForget: el<HTMLButtonElement>('token-forget'),
     tokenClose: el<HTMLButtonElement>('token-close'),
     fmt: el('fmt-bar'),
+    picture: el<HTMLButtonElement>('btn-picture'),
+    pictureFile: el<HTMLInputElement>('picture-file'),
     drafts: el('drafts'),
     toast: el('toast'),
     editorHost: el('editor'),
@@ -195,9 +206,26 @@ export function mountEditor(): void {
       }),
       Typography,
       Sidenote,
+      Figure,
     ],
     content: '',
-    editorProps: { attributes: { spellcheck: 'true' } },
+    editorProps: {
+      attributes: { spellcheck: 'true' },
+      handlePaste: (_view, event) => {
+        const files = imageFiles(event.clipboardData);
+        if (files.length === 0) return false;
+        void insertPictures(files);
+        return true;
+      },
+      handleDrop: (view, event) => {
+        const files = imageFiles(event.dataTransfer);
+        if (files.length === 0) return false;
+        const drop = view.posAtCoords({ left: event.clientX, top: event.clientY });
+        if (drop) editor.commands.setTextSelection(drop.pos);
+        void insertPictures(files);
+        return true;
+      },
+    },
     onUpdate: () => { markDirty(); updateEmptyClass(); },
     onSelectionUpdate: () => positionToolbar(),
     onFocus: () => positionToolbar(),
@@ -207,6 +235,33 @@ export function mountEditor(): void {
   function updateEmptyClass(): void {
     ui.editorHost.classList.toggle('is-empty', editor.isEmpty);
   }
+
+  // ----- pictures -----
+  async function insertPictures(files: File[]): Promise<void> {
+    for (const file of files) {
+      status('Preparing picture', 'busy');
+      try {
+        const { dataUrl, name } = await prepareImage(file);
+        editor.chain().focus().insertFigure({ src: dataUrl, name }).run();
+      } catch (error) {
+        toast((error as Error).message || 'Could not add that picture.', 7000);
+      }
+    }
+    markDirty();
+  }
+  ui.picture.addEventListener('click', () => { ui.pictureFile.value = ''; ui.pictureFile.click(); });
+  ui.pictureFile.addEventListener('change', () => { void insertPictures(imageFiles(ui.pictureFile)); });
+  // A file dropped anywhere else on the page would open in the browser and
+  // leave the editor. Catch it and add the picture at the end instead.
+  document.addEventListener('dragover', (event) => { if (imageFiles(event.dataTransfer).length) event.preventDefault(); });
+  document.addEventListener('drop', (event) => {
+    if (event.defaultPrevented) return; // the editor already took it
+    const files = imageFiles(event.dataTransfer);
+    if (files.length === 0) return;
+    event.preventDefault();
+    editor.commands.focus('end');
+    void insertPictures(files);
+  });
 
   // ----- floating format bar -----
   const commands: Record<string, () => void> = {
@@ -322,8 +377,8 @@ export function mountEditor(): void {
     window.clearTimeout(saveTimer);
     readFields();
     draft.updatedAt = Date.now();
-    saveDraft(draft);
-    status(`Draft, saved ${timeNow()}`, 'saved');
+    if (saveDraft(draft)) status(`Draft, saved ${timeNow()}`, 'saved');
+    else status('Draft too big to save here. Publish to keep it.', 'error');
   }
 
   ui.title.addEventListener('input', () => {
@@ -427,6 +482,7 @@ export function mountEditor(): void {
     if (!tok) { openSettings('Add a GitHub token to publish. Drafts stay in this browser until then.'); return; }
 
     const path = `${config.essaysDir}/${draft.slug}.md`;
+    const pictures = await extractDataImages(stripBase(draft.html, config.base), draft.slug);
     const meta: EssayMeta = {
       title: draft.title,
       dek: draft.dek || undefined,
@@ -436,12 +492,19 @@ export function mountEditor(): void {
       bookAuthor: draft.bookAuthor || undefined,
       replyTo: draft.replyTo || undefined,
     };
-    const content = serializeEssay(meta, draft.html);
+    const content = serializeEssay(meta, pictures.html);
     const commitAuthor = { name: author.name, email: `${author.id}@essays.invalid` };
 
     ui.publish.disabled = true;
     status('Publishing', 'busy');
     try {
+      // Pictures go up first, one commit each, skipping any already there.
+      for (const [i, upload] of pictures.uploads.entries()) {
+        status(`Uploading picture ${i + 1} of ${pictures.uploads.length}`, 'busy');
+        if (await fileSha(config.repo, upload.path, config.branch, tok)) continue;
+        await putFile({ repo: config.repo, path: upload.path, branch: config.branch, content: upload.base64, contentIsBase64: true, message: `Add a picture to "${draft.title}"`, token: tok, author: commitAuthor });
+      }
+      status('Publishing', 'busy');
       let sha = draft.sha;
       if (!sha) {
         const existing = await getFile(config.repo, path, config.branch, tok);
@@ -529,7 +592,7 @@ export function mountEditor(): void {
             replyTo: str(meta.replyTo),
             author: str(meta.author) || draft.author,
             date: str(meta.date).slice(0, 10) || today(),
-            html: looksLikeHtml(body) ? body : plainTextToHtml(body),
+            html: looksLikeHtml(body) ? withBase(body, config.base) : plainTextToHtml(body),
             sha: file.sha,
           };
           if (!looksLikeHtml(body)) toast('This essay was written in Markdown by hand. Its text is here, but the formatting will need redoing.', 9000);

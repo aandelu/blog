@@ -10,6 +10,7 @@
     "check": "astro check"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "^0.4.1",
     "@astrojs/rss": "^4.0.19",
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-typography": "^3.31.3",

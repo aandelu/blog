@@ -44,12 +44,23 @@ export function decodeBase64(b64: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-export async function getFile(repo: string, path: string, branch: string, token?: string): Promise<{ sha: string; content: string } | null> {
+async function fetchFile(repo: string, path: string, branch: string, token?: string): Promise<{ sha: string; content: string } | null> {
   const res = await fetch(`${API}/repos/${repo}/contents/${encodePath(path)}?ref=${encodeURIComponent(branch)}`, { headers: headers(token) });
   if (res.status === 404) return null;
   if (!res.ok) throw new GitHubError(res.status, await errorMessage(res));
-  const json = (await res.json()) as { sha: string; content: string };
-  return { sha: json.sha, content: decodeBase64(json.content) };
+  return (await res.json()) as { sha: string; content: string };
+}
+
+export async function getFile(repo: string, path: string, branch: string, token?: string): Promise<{ sha: string; content: string } | null> {
+  const json = await fetchFile(repo, path, branch, token);
+  return json ? { sha: json.sha, content: decodeBase64(json.content) } : null;
+}
+
+// The blob hash of a file, or null if it does not exist. Used for pictures,
+// whose bytes are not needed.
+export async function fileSha(repo: string, path: string, branch: string, token?: string): Promise<string | null> {
+  const json = await fetchFile(repo, path, branch, token);
+  return json ? json.sha : null;
 }
 
 export interface PutFileOptions {
@@ -57,6 +68,8 @@ export interface PutFileOptions {
   path: string;
   branch: string;
   content: string;
+  // Set when `content` is already base64, as it is for pictures.
+  contentIsBase64?: boolean;
   message: string;
   token: string;
   sha?: string;
@@ -69,7 +82,7 @@ export async function putFile(opts: PutFileOptions): Promise<{ sha: string; comm
     headers: { ...headers(opts.token), 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message: opts.message,
-      content: encodeBase64(opts.content),
+      content: opts.contentIsBase64 ? opts.content : encodeBase64(opts.content),
       branch: opts.branch,
       sha: opts.sha,
       author: opts.author,

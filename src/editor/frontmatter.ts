@@ -30,7 +30,7 @@ export function serializeEssay(meta: EssayMeta, html: string): string {
 // block in Markdown, so collapse any run of newlines to a single one.
 export function prettyHtml(html: string): string {
   return html
-    .replace(/<\/(p|h[1-6]|blockquote|ul|ol|li|pre)>/g, '</$1>\n')
+    .replace(/<\/(p|h[1-6]|blockquote|ul|ol|li|pre|figure)>/g, '</$1>\n')
     .replace(/<hr\s*\/?>/g, '<hr>\n')
     .replace(/\n\s*\n+/g, '\n')
     .trim();
@@ -58,7 +58,7 @@ export function parseFrontmatter(text: string): { meta: Record<string, string | 
 }
 
 export function looksLikeHtml(body: string): boolean {
-  return /^\s*<(p|h[1-6]|blockquote|ul|ol|hr|div)\b/i.test(body);
+  return /^\s*<(p|h[1-6]|blockquote|ul|ol|hr|div|figure)\b/i.test(body);
 }
 
 // Fallback for essays written by hand in Markdown: keep the text, lose the

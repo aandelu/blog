@@ -48,6 +48,8 @@ Go to `/write/`. Type a title, a one-line summary, the book (if there is one), a
 
 Pick who you are publishing as, set **Reply to** if the essay answers another, and press **Publish**. The site rebuilds within a couple of minutes. To change a published essay, open it on the site and click **Edit** (the link appears once a token is saved in that browser), or go to `/write/?slug=the-essay-slug`.
 
+**Pictures.** Click **Add a picture** under the essay, or paste or drop an image into the text. It appears where the cursor was, with a caption you can type or leave empty. The browser shrinks it to at most 1600 pixels on its longest side before it goes anywhere. When you publish, the pictures are committed to `public/images/essays/<slug>/` and the essay refers to them there. To remove one, click it and press Delete.
+
 Drafts live in the browser you wrote them in until published. The write page lists them.
 
 You can also write essays by hand. Drop a file in `src/content/essays/` named `your-slug.md`:
@@ -63,9 +65,10 @@ bookAuthor: "Its Author"
 replyTo: "slug-of-the-essay-this-answers"
 ---
 <p>The essay, as HTML or Markdown.</p>
+<figure><img src="/images/essays/your-slug/picture.jpg" alt="What it shows"><figcaption>An optional caption.</figcaption></figure>
 ```
 
-Only `title`, `author` and `date` are required. Add `draft: true` to keep an essay out of the build.
+Only `title`, `author` and `date` are required. Add `draft: true` to keep an essay out of the build. Pictures go in `public/images/essays/your-slug/` and are written as `/images/…`; the build adds the site's base path.
 
 ## Adding an author
 

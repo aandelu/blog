@@ -91,6 +91,10 @@ a:hover { color: var(--accent); }
 .essay-body hr { border: 0; margin: 36px 0; text-align: center; }
 .essay-body hr::after { content: '· · ·'; letter-spacing: 10px; color: var(--muted); font-size: 18px; }
 .essay-body strong { font-weight: 600; }
+.essay-body figure { margin: 6px 0 30px; }
+.essay-body figure img { display: block; width: 100%; height: auto; border-radius: 3px; }
+.essay-body figcaption { font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: var(--muted); margin-top: 10px; text-wrap: pretty; }
+.essay-body figcaption:empty { display: none; }
 .essay-body u { text-decoration-thickness: 1px; text-underline-offset: 3px; }
 
 /* Margin notes. A note is written inline, right where it is referenced; the
@@ -146,6 +150,13 @@ a:hover { color: var(--accent); }
 .essay-body.is-empty .ProseMirror > p:first-child::before { content: 'Start writing'; color: var(--faint); font-style: italic; float: left; height: 0; pointer-events: none; }
 .ProseMirror .sn-text:empty::after { content: 'margin note'; color: var(--faint); font-style: italic; }
 .ProseMirror-selectednode { outline: 2px solid var(--selection); }
+.ProseMirror figcaption { min-height: 1.5em; }
+.ProseMirror figcaption:empty { display: block; }
+.ProseMirror figure.no-caption figcaption::before { content: 'Caption, optional'; color: var(--faint); font-style: italic; float: left; height: 0; pointer-events: none; }
+.ProseMirror figure.ProseMirror-selectednode { outline: none; }
+.ProseMirror figure.ProseMirror-selectednode img { outline: 3px solid var(--selection); }
+.linkish { font: inherit; color: var(--ink); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.linkish:hover { color: var(--accent); }
 .editor-hint { font-family: var(--sans); font-size: 13px; color: var(--muted); margin: 24px 0 0; }
 .editor-hint kbd { font-family: var(--sans); border: 1px solid var(--rule); border-radius: 3px; padding: 0 5px; }
 
